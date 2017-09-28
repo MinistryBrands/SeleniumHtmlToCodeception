@@ -158,14 +158,12 @@ class ConvertSeleniumToCodeception extends Command
 
         foreach ($rows as $key => $row)
         {
-            if ($row->childNodes->item(0)->childNodes !== null)
+            
+            $steps[$key]['command'] = $row->childNodes->item(1)->childNodes->item(0)->data;
+            $steps[$key]['target'] = $row->childNodes->item(3)->childNodes->item(0)->data;
+            if (!is_null($row->childNodes->item(5)->childNodes->item(0)))
             {
-                $steps[$key]['command'] = $row->childNodes->item(0)->childNodes->item(0)->data;
-                $steps[$key]['target'] = $row->childNodes->item(2)->childNodes->item(0)->data;
-                if (!is_null($row->childNodes->item(4)->childNodes->item(0)))
-                {
-                    $steps[$key]['extra'] = $row->childNodes->item(4)->childNodes->item(0)->data;
-                }
+                $steps[$key]['extra'] = $row->childNodes->item(5)->childNodes->item(0)->data;
             }
         }
 
@@ -202,10 +200,12 @@ class ConvertSeleniumToCodeception extends Command
         $doc = new \DOMDocument();
         libxml_use_internal_errors(true);
         $doc->loadHTML(file_get_contents($file_name));
-
+        $this->info('Processing '.$file_name);
         $title = $this->getTitleFromDoc($doc);
+        $this->info($title);
         $tables = $doc->getElementsByTagName('tbody');
         $rows = $tables->item(0)->getElementsByTagName('tr');
+
         $steps = $this->getTestSteps($rows);
         $steps = $this->convertSeleniumToCodceptionSteps($steps);
 
