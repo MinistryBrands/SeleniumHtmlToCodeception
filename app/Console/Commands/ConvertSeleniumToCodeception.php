@@ -140,6 +140,49 @@ class ConvertSeleniumToCodeception extends Command
     }
 
     /**
+     * @param $file
+     * @return string
+     */
+    private function convertPathToClassName($file)
+    {
+        $class = $file->getPathName();
+
+        $class = str_replace($this->argument('source_path'), '', $class);
+        $class = str_replace('.'.$file->getExtension(), '', $class);
+        $class = str_replace(' ', '', $class);
+        $class = str_replace('(', '', $class);
+        $class = str_replace(')', '', $class);
+        $class = str_replace('/', '', $class);
+        $class = str_replace('&', '', $class);
+
+        return $class.'Cest';
+    }
+
+    /**
+     * @param $file
+     * @return mixed
+     */
+    private function convertPathToNamespace($file)
+    {
+        $ns = $file->getPathName();
+
+        $ns = str_replace($this->argument('source_path'), "App\Tests\Automation", $ns);
+        $ns = str_replace($file->getBaseName(), '', $ns);
+        $ns = str_replace(' ', "\\", $ns);
+        $ns = str_replace('/', "\\", $ns);
+        $ns = str_replace('(', '', $ns);
+        $ns = str_replace(')', '', $ns);
+        $ns = str_replace('&', '', $ns);
+        
+        if (substr($ns, -1) === '\\')
+        {
+            $ns = rtrim($ns, '\\');
+        }
+
+        return $ns;
+    }
+
+    /**
      * Returns an array of all of the test steps
      * from the table rows given
      *
@@ -149,11 +192,22 @@ class ConvertSeleniumToCodeception extends Command
     private function getTestSteps($rows)
     {
         $steps = [];
+<<<<<<< Updated upstream
         foreach ($rows as $key => $row) {
             $steps[$key]['command'] = $row->childNodes->item(0)->childNodes->item(0)->data;
             $steps[$key]['target'] = $row->childNodes->item(2)->childNodes->item(0)->data;
             if (!is_null($row->childNodes->item(4)->childNodes->item(0))) {
                 $steps[$key]['extra'] = $row->childNodes->item(4)->childNodes->item(0)->data;
+=======
+
+        foreach ($rows as $key => $row)
+        {
+            $steps[$key]['command'] = $row->childNodes->item(1)->childNodes->item(0)->data;
+            $steps[$key]['target'] = $row->childNodes->item(3)->childNodes->item(0)->data;
+            if (!is_null($row->childNodes->item(5)->childNodes->item(0)))
+            {
+                $steps[$key]['extra'] = $row->childNodes->item(5)->childNodes->item(0)->data;
+>>>>>>> Stashed changes
             }
         }
 
@@ -180,7 +234,7 @@ class ConvertSeleniumToCodeception extends Command
     /**
      * Process $file_name and return array of
      * title, class, steps
-     *
+     *≈
      * @param $file_name
      * @return array
      */
@@ -189,7 +243,10 @@ class ConvertSeleniumToCodeception extends Command
         $doc = new \DOMDocument();
         libxml_use_internal_errors(true);
         $doc->loadHTML(file_get_contents($file_name));
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
         $title = $this->getTitleFromDoc($doc);
         $tables = $doc->getElementsByTagName('tbody');
         $rows = $tables->item(0)->getElementsByTagName('tr');
@@ -198,6 +255,7 @@ class ConvertSeleniumToCodeception extends Command
 
         return [
             'title' => $title,
+            'namespace' => $this->convertPathToNamespace($file_name),
             'class' => $this->convertTitleToClassName($title),
             'steps' => $steps,
         ];
@@ -218,11 +276,15 @@ class ConvertSeleniumToCodeception extends Command
         }
 
         // Render the new PHP file
+<<<<<<< Updated upstream
         $new_file = view('codeception-cest')
             ->with('title', $test['title'])
             ->with('class', $test['class'])
             ->with('steps', $test['steps'])
             ->with('header', '<?php');
+=======
+        $new_file = view('codeception-cest')->with('title', $test['title'])->with('namespace', $test['namespace'])->with('class', $test['class'])->with('steps', $test['steps'])->with('header', '<?php');
+>>>>>>> Stashed changes
 
         // Save the file to disk
         file_put_contents(
