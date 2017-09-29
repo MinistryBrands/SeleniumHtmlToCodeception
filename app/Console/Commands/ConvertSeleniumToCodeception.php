@@ -52,17 +52,16 @@ class ConvertSeleniumToCodeception extends Command
     public function handle()
     {
         $this->source_path = $this->argument('source_path');
-        $this->storage_path = storage_path() . '/codeception';
-        $directories = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($this->source_path),
-            RecursiveIteratorIterator::SELF_FIRST
-        );
+        $this->storage_path = storage_path().'/codeception';
+        $directories = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->source_path), RecursiveIteratorIterator::SELF_FIRST);
         $bar = $this->output->createProgressBar(count($directories));
 
-        foreach ($directories as $path => $file) {
+        foreach ($directories as $path => $file)
+        {
             if ($file->isDir()) continue;
 
-            if ($file->getExtension() === "html") {
+            if ($file->getExtension() === "html")
+            {
                 $test = $this->processFile($file);
                 $this->writeFile($test, $path);
             }
@@ -82,8 +81,10 @@ class ConvertSeleniumToCodeception extends Command
      */
     private function convertSeleniumToCodceptionSteps($steps)
     {
-        foreach ($steps as $index => $step) {
-            switch ($step['command']) {
+        foreach ($steps as $index => $step)
+        {
+            switch ($step['command'])
+            {
                 case "clickAt":
                     $steps[$index]['command'] = 'click';
                     break;
@@ -100,23 +101,28 @@ class ConvertSeleniumToCodeception extends Command
                     break;
             }
 
-            if (strpos($step['target'], 'xpath=') !== false) {
+            if (strpos($step['target'], 'xpath=') !== false)
+            {
                 $steps[$index]['target'] = str_replace('xpath=', '#', $step['target']);
             }
 
-            if (strpos($step['target'], 'id=') !== false) {
+            if (strpos($step['target'], 'id=') !== false)
+            {
                 $steps[$index]['target'] = str_replace('id=', '#', $step['target']);
             }
 
-            if (strpos($step['target'], 'link=') !== false) {
+            if (strpos($step['target'], 'link=') !== false)
+            {
                 $steps[$index]['target'] = str_replace('link=', '', $step['target']);
             }
 
-            if (strpos($step['target'], 'css=') !== false) {
+            if (strpos($step['target'], 'css=') !== false)
+            {
                 $steps[$index]['target'] = str_replace('css=', '', $step['target']);
             }
 
-            if (strpos($step['target'], '"') !== false) {
+            if (strpos($step['target'], '"') !== false)
+            {
                 $steps[$index]['target'] = str_replace('"', '', $step['target']);
             }
         }
@@ -136,7 +142,7 @@ class ConvertSeleniumToCodeception extends Command
         $title = str_replace('(', '', $title);
         $title = str_replace(')', '', $title);
 
-        return $title . 'Cest';
+        return $title.'Cest';
     }
 
     /**
@@ -173,7 +179,6 @@ class ConvertSeleniumToCodeception extends Command
         $ns = str_replace('(', '', $ns);
         $ns = str_replace(')', '', $ns);
         $ns = str_replace('&', '', $ns);
-        
         if (substr($ns, -1) === '\\')
         {
             $ns = rtrim($ns, '\\');
@@ -192,13 +197,6 @@ class ConvertSeleniumToCodeception extends Command
     private function getTestSteps($rows)
     {
         $steps = [];
-<<<<<<< Updated upstream
-        foreach ($rows as $key => $row) {
-            $steps[$key]['command'] = $row->childNodes->item(0)->childNodes->item(0)->data;
-            $steps[$key]['target'] = $row->childNodes->item(2)->childNodes->item(0)->data;
-            if (!is_null($row->childNodes->item(4)->childNodes->item(0))) {
-                $steps[$key]['extra'] = $row->childNodes->item(4)->childNodes->item(0)->data;
-=======
 
         foreach ($rows as $key => $row)
         {
@@ -207,7 +205,6 @@ class ConvertSeleniumToCodeception extends Command
             if (!is_null($row->childNodes->item(5)->childNodes->item(0)))
             {
                 $steps[$key]['extra'] = $row->childNodes->item(5)->childNodes->item(0)->data;
->>>>>>> Stashed changes
             }
         }
 
@@ -224,7 +221,8 @@ class ConvertSeleniumToCodeception extends Command
     {
         $xpath = new \DOMXPath($doc);
         $title_search = $xpath->query('//title');
-        if ($title_search->length > 0) {
+        if ($title_search->length > 0)
+        {
             return $title_search->item(0)->nodeValue;
         }
 
@@ -243,13 +241,10 @@ class ConvertSeleniumToCodeception extends Command
         $doc = new \DOMDocument();
         libxml_use_internal_errors(true);
         $doc->loadHTML(file_get_contents($file_name));
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
         $title = $this->getTitleFromDoc($doc);
         $tables = $doc->getElementsByTagName('tbody');
         $rows = $tables->item(0)->getElementsByTagName('tr');
+
         $steps = $this->getTestSteps($rows);
         $steps = $this->convertSeleniumToCodceptionSteps($steps);
 
@@ -271,29 +266,15 @@ class ConvertSeleniumToCodeception extends Command
     {
         // Preserve Test folder structure
         $save_path = pathinfo(str_replace($this->source_path, '', $path));
-        if (!file_exists($this->storage_path . '/' . $save_path['dirname'])) {
-            mkdir($this->storage_path . '/' . $save_path['dirname'], 0755, true);
+        if (!file_exists($this->storage_path.'/'.$save_path['dirname']))
+        {
+            mkdir($this->storage_path.'/'.$save_path['dirname'], 0755, true);
         }
 
         // Render the new PHP file
-<<<<<<< Updated upstream
-        $new_file = view('codeception-cest')
-            ->with('title', $test['title'])
-            ->with('class', $test['class'])
-            ->with('steps', $test['steps'])
-            ->with('header', '<?php');
-=======
         $new_file = view('codeception-cest')->with('title', $test['title'])->with('namespace', $test['namespace'])->with('class', $test['class'])->with('steps', $test['steps'])->with('header', '<?php');
->>>>>>> Stashed changes
 
         // Save the file to disk
-        file_put_contents(
-            $this->storage_path
-            . '/'
-            . $save_path['dirname']
-            . '/'
-            . $test['class'] . '.php',
-            $new_file
-        );
+        file_put_contents($this->storage_path.'/'.$save_path['dirname'].'/'.$test['class'].'.php', $new_file);
     }
 }
